@@ -193,25 +193,77 @@ export const editProfile = async (req, res) => {
     }
 };
 
-// Suggested users logiv
+// Suggested users login
 export const getSuggestedUsers = async (req, res) => {
-    try{
-        const suggestedUsers = await User.find({_id:{$ne:req.id}}).select("-password");
-        if(!suggestedUsers || suggestedUsers.length === 0) {
+    try {
+        const suggestedUsers = await User.find({ _id: { $ne: req.id } }).select("-password");
+        if (!suggestedUsers || suggestedUsers.length === 0) {
             return res.status(400).json({
-                message:"Currently do not have any users"
+                message: "Currently do not have any users"
             })
         }
         //Return the suggested users
         return res.status(200).json({
-            success:true,
-            users:suggestedUsers
+            success: true,
+            users: suggestedUsers
         })
     } catch (error) {
         console.log(error);
         res.status(500).json({
             success: false,
-            message:"An error occurred while fetching suggested users"
+            message: "An error occurred while fetching suggested users"
+        })
+    }
+}
+
+//Follow and Unfollow logiv
+export const followOrUnfollow = async (req, res) => {
+    try {
+        const follower = req.id // shawn
+        const followee = req.params.id //bouchra
+        if (follower === followee) {
+            return res.status(400).json({
+                message: "You cannot follow.unfollow yourself",
+                success: false,
+            })
+        }
+        const user = await User.findById(follower);
+        const targetUser = await User.findById(followee);
+
+        if (!user || !targetUser) {
+            return res.status(400).json({
+                message: "User not found",
+                success: false,
+            });
+        }
+        // I will check wether to follow or unfollow
+        const isFollowing = user.following.includes(followee);
+        if (isFollowing) {
+            //Logic to unfollow user
+            await Promise.all([User.updateOne({ _id: follower }, { $pull: { following: followee } })
+            ])
+            await Promise.all([User.updateOne({ _id: followee }, { $pull: { followers: follower } })
+            ])
+            return res.status(200).json({
+                message: "Unfollowed successfully",
+                success: true,
+            });
+        } else {
+            //logic to follow the user.
+            await Promise.all([User.updateOne({ _id: follower }, { $push: { following: followee } })
+            ])
+            await Promise.all([User.updateOne({ _id: followee }, { $push: { followers: follower } })
+            ])
+            return res.status(200).json({
+                message: "followed successfully",
+                success: true,
+            });
+        }
+    } catch (error) {
+        console.log(error);
+        res.status(500).json({
+            success: false,
+            message: "server errors"
         })
     }
 }
