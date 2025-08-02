@@ -1,6 +1,8 @@
-import User from " ../models/user.model.js";
+import {User} from "../models/user.model.js";
 import jwt from 'jsonwebtoken';
-import getDataUri from "../utils/datauri";
+import bcrypt from 'bcryptjs';
+import cloudinary from '../utils/cloudinary.js';
+import getDataUri from "../utils/datauri.js";
 
 //Registration logic
 export const register = async (req, res) => {
@@ -60,9 +62,9 @@ export const login = async (req, res) => {
             })
         }
         // Check if the password is correct
-        const isPasswordMatch = await bcrypt.compare(passsword, user.password);
+        const isPasswordMatch = await bcrypt.compare(password, user.password);
         if (!isPasswordMatch) {
-            return res.response.status(401).json({
+            return res.status(401).json({
                 message: "Invalid email or password",
                 success: false
             })
@@ -89,7 +91,7 @@ export const login = async (req, res) => {
                 expiresIn: '1d'
             }
         );
-        return res.cookies('token', token, {
+        return res.cookie('token', token, {
             httpOnly: true, sameSite: 'strict', maxAge: 1 * 24 * 60 * 60 * 1000,
         }).json({
             message: `Welcome back ${user.username}`,
@@ -120,7 +122,7 @@ export const logout = async (_, res) => {
 export const getProfile = async (req, res) => {
     try {
         // use req.params.id to get the User ID from the route parameter
-        const userId = req.params._id
+        const userId = req.params.id
         // Find user by userId
         const user = await User.findById(userId);
         //If user is not found, return 404 error
@@ -152,7 +154,7 @@ export const editProfile = async (req, res) => {
     try {
         // Retrieved from the authenticated middleware
         const userId = req.id;
-        const { boi, gender } = req.body;
+        const { bio, gender } = req.body;
         const profilePicture = req.file;
         let cloudResponse;
 
@@ -175,8 +177,7 @@ export const editProfile = async (req, res) => {
 
         // update profile picture url
         if (profilePicture)
-            user.profilePicture = profilePicture = cloudResponse.secure_uri;
-        cloudResponse.secure_uri;
+            user.profilePicture = cloudResponse.secure_url;
         await user.save();
         return res.status(200).json({
             message: "Profile updated successfully",
@@ -216,7 +217,7 @@ export const getSuggestedUsers = async (req, res) => {
     }
 }
 
-//Follow and Unfollow logiv
+//Follow and Unfollow logic
 export const followOrUnfollow = async (req, res) => {
     try {
         const follower = req.id // shawn
