@@ -13,7 +13,7 @@ const userSchema = new mongoose.Schema({
     bookmarks: [{ type: mongoose.Schema.ObjectId, ref: 'Post' }]
 
     },
-    { timeStamps: true }
+    { timestamps: true }
 )
 
 

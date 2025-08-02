@@ -96,7 +96,7 @@ export const login = async (req, res) => {
         }).json({
             message: `Welcome back ${user.username}`,
             success: true,
-            user,
+            user
         })
 
     } catch (error) {
@@ -111,7 +111,7 @@ export const logout = async (_, res) => {
         //clear the cookies that holds the JWT token
         return res.cookie('token', "", { maxAge: 0 }).json({
             message: "Logged out successfully",
-            success: true,
+            success: true
         })
     } catch (error) {
         console.log(error);
@@ -143,7 +143,7 @@ export const getProfile = async (req, res) => {
         //Return a 500 server error response
         return res.status(500).json({
             message: "Server error",
-            success: false,
+            success: false
         })
 
     }
@@ -155,7 +155,7 @@ export const editProfile = async (req, res) => {
         // Retrieved from the authenticated middleware
         const userId = req.id;
         const { bio, gender } = req.body;
-        const profilePicture = req.file;
+        const profilePicture = req.files && req.files[0];
         let cloudResponse;
 
         if (profilePicture) {
@@ -163,11 +163,11 @@ export const editProfile = async (req, res) => {
             cloudResponse = await cloudinary.uploader.upload(fileUri);
         }
 
-        const user = await User.findById(userId);
+        const user = await User.findById(userId).select("-password");
         if (!user) {
             return res.status(404).json({
                 message: "User not found",
-                success: false,
+                success: false
             })
         }
 
@@ -176,19 +176,20 @@ export const editProfile = async (req, res) => {
         if (gender) user.gender = gender;
 
         // update profile picture url
-        if (profilePicture)
+        if (profilePicture) {
             user.profilePicture = cloudResponse.secure_url;
+        }
         await user.save();
         return res.status(200).json({
             message: "Profile updated successfully",
-            success: true,
+            success: true
         })
     } catch (error) {
         console.log(error);
         //Return a 500 server error response
         return res.status(500).json({
             message: "Server error",
-            success: false,
+            success: false
         })
 
     }
@@ -225,7 +226,7 @@ export const followOrUnfollow = async (req, res) => {
         if (follower === followee) {
             return res.status(400).json({
                 message: "You cannot follow.unfollow yourself",
-                success: false,
+                success: false
             })
         }
         const user = await User.findById(follower);
@@ -234,7 +235,7 @@ export const followOrUnfollow = async (req, res) => {
         if (!user || !targetUser) {
             return res.status(400).json({
                 message: "User not found",
-                success: false,
+                success: false
             });
         }
         // I will check wether to follow or unfollow
@@ -247,7 +248,7 @@ export const followOrUnfollow = async (req, res) => {
             ])
             return res.status(200).json({
                 message: "Unfollowed successfully",
-                success: true,
+                success: true
             });
         } else {
             //logic to follow the user.
@@ -257,7 +258,7 @@ export const followOrUnfollow = async (req, res) => {
             ])
             return res.status(200).json({
                 message: "followed successfully",
-                success: true,
+                success: true
             });
         }
     } catch (error) {
