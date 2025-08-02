@@ -3,6 +3,7 @@ import cors from 'cors';
 import cookieParser from 'cookie-parser';
 import dotenv from 'dotenv'
 import connectDB from './config/db.js';
+import userRoute from './routes/user.route.js'
 
 
 dotenv.config({})
@@ -26,6 +27,15 @@ const corsOptions = {
 };
 app.use(cors(corsOptions));
 
+//SimpleRoutes
+app.get('/', (req, res) => {
+    return res.status(200).json({
+        message: "Hello world",
+        success: true,
+    });
+});
+
+app.use('/api/v1/user', userRoute)
 
 //Start the Server
 const listen = async () => {
@@ -38,12 +48,3 @@ const listen = async () => {
     }
 };
 listen();
-
-
-//SimpleRoutes
-app.get('/', (req, res) => {
-    return res.status(200).json({
-        message: "Hello world",
-        success: true,
-    });
-});
