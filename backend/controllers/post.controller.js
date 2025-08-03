@@ -65,27 +65,62 @@ export const addNewPost = async (req, res) => {
         //Create post in the database
         const post = await Post.create({
             caption,
-            image:cloudResponse.secure_url,
-            author:authorId
+            image: cloudResponse.secure_url,
+            author: authorId
         });
         // Update the users post array
         const user = await User.findById(authorId);
-        if(user) {
+        if (user) {
             user.post.push(post._id);
             await user.save();
         }
         //Populate the post author field (exluding password)
-        await post.populate({path: "author", select: "-password"});
+        await post.populate({ path: "author", select: "-password" });
         return res.status(201).json({
             message: 'New post added',
             post,
-            success:true
+            success: true
         })
     } catch (error) {
         console.log('Unexpected error occurred', error)
         return res.status(500).json({
             message: "An Unexpected error occurred",
-            error:error.message
+            error: error.message
         })
+    }
+};
+
+//Get all posts logic
+export const getAllPost = async (req, res) => {
+    try{
+        //Fetch posts with sorting and population
+        const posts = await Post.find()
+        .sort({
+            createdAt: -1
+        })
+        .populate({
+            path:'author,',
+            select: "username profilePicture"
+        })
+        .populate({
+            path:"comments",
+            sort: {createdAt: -1},
+            populate: {
+                path:'author',
+                select: "username profilePicture"
+            },
+        });
+        //return the fetched post
+        return res.status(200).json({
+            posts,
+            success:true,
+        });
+    } catch(error) {
+        console.error('Error fetching posts', error);
+        return res.status(500).json({
+            message:"An Unexpected error occurred while trying to fetch the posts",
+            error: error.message,
+            success: false,
+        });
     }
 }
