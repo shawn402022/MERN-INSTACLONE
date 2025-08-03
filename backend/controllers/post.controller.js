@@ -363,4 +363,59 @@ export const deletePost = async (reg, res) => {
             success: false
         })
     }
+};
+
+//Bookmark Post
+export const bookmarkPost = async (req, res) => {
+
+    try {
+        const postId = req.params.id;
+        const authorId = req.id;
+
+        //Check if the post exists
+        const post = await Post.findById(postId);
+        if (!post) {
+            return res.status(404({
+                message: "Post not found",
+                success: false,
+            }))
+        }
+        //find the user
+        const user = await User.findById(authorId);
+        if (!user) {
+            return res.status(404).json({
+                message: "User not found",
+                success: false
+            })
+        }
+        //Check if the post is already bookmarked
+        if (user.bookmarks.includes(post._id)) {
+            // post is already bookmarked -> remove from the bookmarks
+            await user.updateOne({ $pull: { bookmarks: post._id } })
+            return res.status(200).json({
+                type: 'Unsaved',
+                message: 'post removed from bookmarked',
+                success: true
+            })
+        } else {
+            //Post is not bookmarked -> add to the bookmark
+            await user.updateOne({ $addToSet: { bookmarks: post._id } })
+            return res.status(200).json({
+                type: 'Saved',
+                message: 'Post bookmarked',
+                success: true
+            })
+        }
+    } catch (error) {
+        console.error('Error bookmarking post',error);
+        return res.status(500).json({
+            message:"Error occurred while trying to create bookmark",
+            error: error.message,
+            success:false
+        })
+    }
+
+
+
+
 }
