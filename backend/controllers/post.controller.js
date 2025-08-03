@@ -2,7 +2,7 @@ import sharp from "sharp"
 import cloudinary from "../utils/cloudinary.js"
 import Post from "../models/post.model.js"
 import User from "../models/user.model.js"
-import Comment from"../models/comments.model.js"
+import Comment from "../models/comments.model.js"
 
 export const addNewPost = async (req, res) => {
     try {
@@ -132,21 +132,21 @@ export const getUerPost = async (req, res) => {
         const authorId = req.id;
         const posts = await Post.find({ author: authorId }).sort({ createAt: -1 })
             .populate({
-                path:'author',
-                select:"username profilePicture"
+                path: 'author',
+                select: "username profilePicture"
             }).populate({
                 path: 'comments',
                 sort: { createAt: -1 },
-                populate:{
+                populate: {
                     path: "author",
                     select: "username profilePicture"
                 }
             })
-            return res.status(200).json({
-                posts,
-                success:true
-            });
-    } catch(error) {
+        return res.status(200).json({
+            posts,
+            success: true
+        });
+    } catch (error) {
         console.error('Error fetching user posts:', error);
         return res.status(500).json({
             message: 'An Unexpected error occurred while fetching user posts',
@@ -157,34 +157,34 @@ export const getUerPost = async (req, res) => {
 }
 
 // Like  logic
-export const likePost = async (req,res) => {
-    try{
+export const likePost = async (req, res) => {
+    try {
         const likerId = req.id;
         const postId = req.params.id;
         const post = await Post.findById(postId);
-        if(!post) {
+        if (!post) {
             return res.status(404).json({
-                message:"Post not found",
+                message: "Post not found",
                 success: false
             });
         }
         //Like logic
         await post.updateOne({
-            $addToSet:{
-                likes:likerId
+            $addToSet: {
+                likes: likerId
             }
         })
         //Implement soket.io for real-time notification
 
         return res.status(200).json({
-            message:"Post liked",
-            success:true,
+            message: "Post liked",
+            success: true,
         });
 
-    } catch(error) {
+    } catch (error) {
         console.error('Error liking post:', error);
         return res.status(500).json({
-            message:"An Unexpected error occurred while liking the post",
+            message: "An Unexpected error occurred while liking the post",
             error: error.message,
             success: true
         })
@@ -192,34 +192,34 @@ export const likePost = async (req,res) => {
 }
 
 // disLike  logic
-export const disLikePost = async (req,res) => {
-    try{
+export const disLikePost = async (req, res) => {
+    try {
         const likerId = req.id;
         const postId = req.params.id;
         const post = await Post.findById(postId);
-        if(!post) {
+        if (!post) {
             return res.status(404).json({
-                message:"Post not found",
+                message: "Post not found",
                 success: false,
             });
         }
         //disLike logic
         await post.updateOne({
-            $pull:{
-                likes:likerId
+            $pull: {
+                likes: likerId
             }
         })
         //Implement soket.io for real-time notification
 
         return res.status(200).json({
-            message:"Post disliked",
-            success:true,
+            message: "Post disliked",
+            success: true,
         });
 
-    } catch(error) {
+    } catch (error) {
         console.error('Error liking post:', error);
         return res.status(500).json({
-            message:"An Unexpected error occurred while disliking the post",
+            message: "An Unexpected error occurred while disliking the post",
             error: error.message,
             success: true
         })
@@ -228,13 +228,13 @@ export const disLikePost = async (req,res) => {
 
 //##Add comment logic
 //Create Comment
-export const addComment = async(req,res) => {
-    try{
+export const addComment = async (req, res) => {
+    try {
         const postId = req.params.id;
-        const commenterId =  req.id;
+        const commenterId = req.id;
 
-        const {text} = req.body;
-        if(!text) {
+        const { text } = req.body;
+        if (!text) {
             return res.status(400).json({
                 message: "Text is required",
                 success: false,
@@ -242,77 +242,125 @@ export const addComment = async(req,res) => {
         }
         //Check if post exists
         const post = await Post.findById(postId);
-        if(!post) {
+        if (!post) {
             return res.status(404).json({
-                message:"Post not found",
+                message: "Post not found",
                 success: false
             })
         }
         //Create a new post
         const comment = await Comment.create({
             text,
-            author:commenterId,
-            post:postId
+            author: commenterId,
+            post: postId
         })
         //Populate the comment author
         await comment.populate({
             path: "author",
-            select:"username profilePicture"
+            select: "username profilePicture"
         });
 
         //Add the comment to the post's comment array
         Post.comments.push(comment._id);
         await post.save();
         return res.status(200).json({
-            message:"Comment Added",
+            message: "Comment Added",
             comment,
             success: true,
         });
-    } catch(error){
+    } catch (error) {
         console.error('Error adding comment', error)
         return res.status(500).json({
-            message:"Unexpected error occurred while trying to add the comment",
-            success:false
+            message: "Unexpected error occurred while trying to add the comment",
+            success: false
         })
     }
 }
 
 //Get comments logic
 export const getCommentsOfPost = async (req, res) => {
-    try{
+    try {
         const postId = req.params.id;
         //check if the post exists
         const post = await Post.findById(postId);
-        if(!post) {
+        if (!post) {
             return res.status(404).json({
-                message:"Post not found",
+                message: "Post not found",
                 success: false,
             })
         }
         // Fetch comments for the given post
-        const comments = await Comment.find({post: postId}).populate(
+        const comments = await Comment.find({ post: postId }).populate(
             "author",
             "username profilePicture"
         );
         // If no comments found, return an empty array with a success message
-        if(comments.length === 0){
+        if (comments.length === 0) {
             return res.status(200).json({
                 message: "No comments found for this post",
                 success: true,
-                comments:[]
+                comments: []
             })
         }
         // Return the comments if found
         return res.status(200).json({
-            success:true,
+            success: true,
             comments
         })
-    } catch(error) {
+    } catch (error) {
         console.error('Error fetching comments', error)
         return res.status(500).json({
             message: 'An unexpected error occurred while fetching comments',
-            error:error.message,
-            success:false
+            error: error.message,
+            success: false
+        })
+    }
+}
+
+//Delete Post Logic
+export const deletePost = async (reg, res) => {
+    try {
+        const postId = req.params.id;
+        const authorId = req.id;
+
+        //Find the post b Id
+        const post = await Post.findById(postId);
+        if (!post) {
+            return res.status(404).json({
+                message: "Post not found",
+                success: false
+            })
+        }
+        //Check if the logged in user is the owner of the post
+        if (post.author.toString() !== authorId) {
+            return res.status(403).json({
+                message: "Unauthorized",
+                success: false,
+            })
+        }
+        //Delete post
+        await post.findByIdAndDelete(postId);
+
+        //Remove the postId from the users post list
+        let user = await User.findById(authorId);
+        if (user) {
+            user.posts = user.posts.filter(id => id.toString() !== postId);
+            await user.save();
+        }
+
+        //Delete associated Comments
+        await Comment.deleteMany({ post: postId })
+        return res.status(200).json({
+            success: true,
+            message: "Post deleted"
+        });
+
+    } catch (error) {
+        console.error('Error deleting post', error);
+        return res.status(500).json({
+            message: 'An Unexpected error occurred while deleting the post',
+            error: error.message,
+            success: false
         })
     }
 }
