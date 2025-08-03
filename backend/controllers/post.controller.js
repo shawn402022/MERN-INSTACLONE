@@ -92,35 +92,65 @@ export const addNewPost = async (req, res) => {
 
 //Get all posts logic
 export const getAllPost = async (req, res) => {
-    try{
+    try {
         //Fetch posts with sorting and population
         const posts = await Post.find()
-        .sort({
-            createdAt: -1
-        })
-        .populate({
-            path:'author,',
-            select: "username profilePicture"
-        })
-        .populate({
-            path:"comments",
-            sort: {createdAt: -1},
-            populate: {
-                path:'author',
+            .sort({
+                createdAt: -1
+            })
+            .populate({
+                path: 'author,',
                 select: "username profilePicture"
-            },
-        });
+            })
+            .populate({
+                path: "comments",
+                sort: { createdAt: -1 },
+                populate: {
+                    path: 'author',
+                    select: "username profilePicture"
+                },
+            });
         //return the fetched post
         return res.status(200).json({
             posts,
-            success:true,
+            success: true,
         });
-    } catch(error) {
+    } catch (error) {
         console.error('Error fetching posts', error);
         return res.status(500).json({
-            message:"An Unexpected error occurred while trying to fetch the posts",
+            message: "An Unexpected error occurred while trying to fetch the posts",
             error: error.message,
             success: false,
         });
+    }
+}
+
+// get individual user post logic
+export const getUerPost = async (req, res) => {
+    try {
+        const authorId = req.id;
+        const posts = await Post.find({ author: authorId }).sort({ createAt: -1 })
+            .populate({
+                path:'author',
+                select:"username profilePicture"
+            }).populate({
+                path: 'comments',
+                sort: { createAt: -1 },
+                populate:{
+                    path: "author",
+                    select: "username profilePicture"
+                }
+            })
+            return res.status(200).json({
+                posts,
+                success:true
+            });
+    } catch(error) {
+        console.error('Error fetching user posts:', error);
+        return res.status(500).json({
+            message: 'An Unexpected error occurred while fetching user posts',
+            error: error.message,
+            success: false
+        })
     }
 }
