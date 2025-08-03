@@ -182,7 +182,8 @@ export const editProfile = async (req, res) => {
         await user.save();
         return res.status(200).json({
             message: "Profile updated successfully",
-            success: true
+            success: true,
+            user
         })
     } catch (error) {
         console.log(error);
