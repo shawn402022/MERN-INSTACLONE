@@ -226,7 +226,8 @@ export const disLikePost = async (req,res) => {
     }
 }
 
-//Add comment logic
+//##Add comment logic
+//Create Comment
 export const addComment = async(req,res) => {
     try{
         const postId = req.params.id;
@@ -271,6 +272,46 @@ export const addComment = async(req,res) => {
         console.error('Error adding comment', error)
         return res.status(500).json({
             message:"Unexpected error occurred while trying to add the comment",
+            success:false
+        })
+    }
+}
+
+//Get comments logic
+export const getCommentsOfPost = async (req, res) => {
+    try{
+        const postId = req.params.id;
+        //check if the post exists
+        const post = await Post.findById(postId);
+        if(!post) {
+            return res.status(404).json({
+                message:"Post not found",
+                success: false,
+            })
+        }
+        // Fetch comments for the given post
+        const comments = await Comment.find({post: postId}).populate(
+            "author",
+            "username profilePicture"
+        );
+        // If no comments found, return an empty array with a success message
+        if(comments.length === 0){
+            return res.status(200).json({
+                message: "No comments found for this post",
+                success: true,
+                comments:[]
+            })
+        }
+        // Return the comments if found
+        return res.status(200).json({
+            success:true,
+            comments
+        })
+    } catch(error) {
+        console.error('Error fetching comments', error)
+        return res.status(500).json({
+            message: 'An unexpected error occurred while fetching comments',
+            error:error.message,
             success:false
         })
     }
