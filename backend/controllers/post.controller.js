@@ -2,6 +2,7 @@ import sharp from "sharp"
 import cloudinary from "../utils/cloudinary.js"
 import Post from "../models/post.model.js"
 import User from "../models/user.model.js"
+import Comment from"../models/comments.model.js"
 
 export const addNewPost = async (req, res) => {
     try {
@@ -163,8 +164,8 @@ export const likePost = async (req,res) => {
         const post = await Post.findById(postId);
         if(!post) {
             return res.status(404).json({
-                message:"Post not found";
-                success: false,
+                message:"Post not found",
+                success: false
             });
         }
         //Like logic
@@ -221,6 +222,56 @@ export const disLikePost = async (req,res) => {
             message:"An Unexpected error occurred while disliking the post",
             error: error.message,
             success: true
+        })
+    }
+}
+
+//Add comment logic
+export const addComment = async(req,res) => {
+    try{
+        const postId = req.params.id;
+        const commenterId =  req.id;
+
+        const {text} = req.body;
+        if(!text) {
+            return res.status(400).json({
+                message: "Text is required",
+                success: false,
+            })
+        }
+        //Check if post exists
+        const post = await Post.findById(postId);
+        if(!post) {
+            return res.status(404).json({
+                message:"Post not found",
+                success: false
+            })
+        }
+        //Create a new post
+        const comment = await Comment.create({
+            text,
+            author:commenterId,
+            post:postId
+        })
+        //Populate the comment author
+        await comment.populate({
+            path: "author",
+            select:"username profilePicture"
+        });
+
+        //Add the comment to the post's comment array
+        Post.comments.push(comment._id);
+        await post.save();
+        return res.status(200).json({
+            message:"Comment Added",
+            comment,
+            success: true,
+        });
+    } catch(error){
+        console.error('Error adding comment', error)
+        return res.status(500).json({
+            message:"Unexpected error occurred while trying to add the comment",
+            success:false
         })
     }
 }
