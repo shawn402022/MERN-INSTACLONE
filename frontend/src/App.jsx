@@ -1,4 +1,5 @@
 import { Button } from "@/components/ui/button"
+import Signup from "./pages/Signup"
 
 import React from 'react'
 import "./App.css"
@@ -6,7 +7,7 @@ import "./App.css"
 const App = () => {
   return (
     <div>
-      <Button className="text-center text-4xl text-blue-500">Instagram Clone </Button>
+      <Signup/>
     </div>
   )
 }
