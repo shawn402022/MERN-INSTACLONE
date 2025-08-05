@@ -414,8 +414,4 @@ export const bookmarkPost = async (req, res) => {
             success:false
         })
     }
-
-
-
-
 }
