@@ -11,10 +11,9 @@ const userSchema = new mongoose.Schema({
     following: [{ type: mongoose.Schema.ObjectId, ref: 'User' }],
     posts: [{ type: mongoose.Schema.ObjectId, ref: 'Post' }],
     bookmarks: [{ type: mongoose.Schema.ObjectId, ref: 'Post' }]
-
-    },
+},
     { timestamps: true }
 )
 
 
-export const User = mongoose.model('User', userSchema)
+export const User = mongoose.model('User', userSchema);
