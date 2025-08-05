@@ -48,3 +48,37 @@ export const sendMessage = async(req,res) => {
         })
     }
 }
+
+//get messages
+
+export const getMessage = async(req,res) => {
+    try{
+        const senderId = req.id;
+        receiverId = req.params.id;
+
+        // find the conversation
+
+        const conversation = await Conversation.find(
+            {participats: {$all: [senderId, receiverId]}}
+        );
+
+        if(!conversation) {
+            return res.status(200).json({
+                success: true,
+                messages:[],
+            })
+        }
+
+        // Return the messages in conversation
+        return res.status(200).json({
+            success:true,
+            messages: conversation.messages
+        })
+    } catch(error) {
+        console.error('Error retrieving messages;', error);
+        return res.status(500).json({
+            success: false,
+            error:"An error occurred while retrieving messages"
+        })
+    }
+}
