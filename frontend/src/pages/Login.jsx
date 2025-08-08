@@ -5,13 +5,13 @@ import { Button } from '@/components/ui/button'
 import { useState } from 'react'
 import { toast } from 'sonner'
 import axios from 'axios'
+import { Loader2 } from 'lucide-react'
 
 
-const Signup = () => {
+const Login = () => {
 
-    // State to handle form input(username, email, password)
     const [input, setInput] = useState({
-        username: "",
+
         email: "",
         password: ""
     });
@@ -45,7 +45,6 @@ const Signup = () => {
 
                 toast.success(res.data.message)
                 setInput({
-                    username: "",
                     email: "",
                     password: ""
                 })
@@ -54,7 +53,7 @@ const Signup = () => {
         } catch (error) {
             console.log(error);
             toast.error(error.response.data.message)
-        } finally{
+        } finally {
             setLoading(false)
         }
 
@@ -65,21 +64,7 @@ const Signup = () => {
             <form onSubmit={signupHandler} className="shadow-lg flex-col gap-5 p-8">
                 <div className="my-4 text-center">
                     <h1 className='text-xl font-bold'>Logo</h1>
-                    <p className="text-sm">Sign up to see photos and videos from our friends </p>
-                </div>
-                <div>
-                    <Label
-                        htmlfor='Username'
-                        className='mb-1'
-                    >Username
-                    </Label>
-                    <Input
-                        type="text"
-                        name='username'
-                        value={input.username}
-                        onChange={changeEventHandler}
-                    >
-                    </Input>
+                    <p className="text-sm">Login to see photos and videos from our friends </p>
                 </div>
                 <div>
                     <Label
@@ -115,10 +100,10 @@ const Signup = () => {
                             <Loader2 className="mr-2 h-2 w-4 animate-spin" /> Please wait
                         </Button>
                     ) : (
-                        <Button type="submit">Signup</Button>
+                        <Button type="submit">Login</Button>
                     )
                 }
-
+                <Button type='submit'>Login</Button>
             </form>
 
 
@@ -126,4 +111,4 @@ const Signup = () => {
     )
 }
 
-export default Signup
+export default Login
