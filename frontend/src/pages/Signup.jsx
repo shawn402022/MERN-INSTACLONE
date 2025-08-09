@@ -5,6 +5,8 @@ import { Button } from '@/components/ui/button'
 import { useState } from 'react'
 import { toast } from 'sonner'
 import axios from 'axios'
+import { Link, Navigate } from 'react-router-dom'
+import { Loader2 } from 'lucide-react'
 
 
 const Signup = () => {
@@ -16,7 +18,8 @@ const Signup = () => {
         password: ""
     });
 
-    const [loading, setLoading] = useState(false)
+    const [loading, setLoading] = useState(false);
+    const navigate = Navigate()
 
     //Function to handle input change
     const changeEventHandler = (e) => {
@@ -42,7 +45,7 @@ const Signup = () => {
 
             //Check to see if registration was successful or not
             if (res.data.success) {
-
+                navigate('/')
                 toast.success(res.data.message)
                 setInput({
                     username: "",
@@ -54,7 +57,7 @@ const Signup = () => {
         } catch (error) {
             console.log(error);
             toast.error(error.response.data.message)
-        } finally{
+        } finally {
             setLoading(false)
         }
 
@@ -118,6 +121,11 @@ const Signup = () => {
                         <Button type="submit">Signup</Button>
                     )
                 }
+                <span>Already have an account?{' '}
+                    <Link className='text-blue-500' to='/Login'
+                    >Login
+                    </Link>
+                </span>
 
             </form>
 

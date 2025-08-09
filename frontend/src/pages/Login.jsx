@@ -6,6 +6,7 @@ import { useState } from 'react'
 import { toast } from 'sonner'
 import axios from 'axios'
 import { Loader2 } from 'lucide-react'
+import { Link, useNavigate } from 'react-router-dom'
 
 
 const Login = () => {
@@ -17,6 +18,7 @@ const Login = () => {
     });
 
     const [loading, setLoading] = useState(false)
+    const navigate = useNavigate()
 
     //Function to handle input change
     const changeEventHandler = (e) => {
@@ -31,7 +33,7 @@ const Login = () => {
         e.preventDefault();
         try {
             setLoading(true);
-            const res = await axios.post("http://localhost:8000/api/v1/user/register", input,
+            const res = await axios.post("http://localhost:8000/api/v1/user/login", input,
                 {
                     headers: {
                         "Content-Type": "application/json",
@@ -40,9 +42,9 @@ const Login = () => {
                 }
             );
 
-            //Check to see if registration was successful or not
+            //Check to see if login was successful or not
             if (res.data.success) {
-
+                navigate('/')
                 toast.success(res.data.message)
                 setInput({
                     email: "",
@@ -103,7 +105,11 @@ const Login = () => {
                         <Button type="submit">Login</Button>
                     )
                 }
-                <Button type='submit'>Login</Button>
+                <span>Doesn't have an account?{" "}
+                    <Link className='text-blue-500' to='/Signup'
+                        >Signup
+                    </Link>
+                </span>
             </form>
 
 
