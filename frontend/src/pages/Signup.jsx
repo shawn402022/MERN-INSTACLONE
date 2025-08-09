@@ -36,10 +36,13 @@ const Signup = () => {
             setLoading(true);
             const res = await axios.post("http://localhost:8000/api/v1/user/register", input,
                 {
+                    //Send POST request to the backend 
                     headers: {
                         "Content-Type": "application/json",
-                        withCredentials: true
-                    }
+
+                    },
+                    withCredentials: true, // Allow credentials (cookies) with request
+
                 }
             );
 
