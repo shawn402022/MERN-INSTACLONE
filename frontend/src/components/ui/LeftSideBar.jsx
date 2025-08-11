@@ -1,10 +1,11 @@
 
 
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
+import CreatePost from "@/pages/CreatePost"
 import { setAuthUser } from "@/redux/authSlice"
 import axios from "axios"
 import { Heart, Home, LogOut, MessageCircle, PlusSquare, Search, TrendingUp } from 'lucide-react'
-import React from 'react'
+import React, { useState } from 'react'
 import { useDispatch, useSelector } from "react-redux"
 import { useNavigate } from "react-router-dom"
 import { toast } from "sonner"
@@ -14,6 +15,7 @@ import { toast } from "sonner"
 
 const LeftSideBar = () => {
 
+    const [open, setOpen] = useState(false)
     const navigate = useNavigate();
     const { user } = useSelector((store) => store.auth)
     const dispatch = useDispatch()
@@ -33,8 +35,14 @@ const LeftSideBar = () => {
         }
     };
     const sidebarHandler = (textType) => {
-        if (textType === "Logout") logoutHandler()
+        if (textType === "Logout") {
+            logoutHandler()
+        } else if (textType === "Create") {
+            setOpen(true)
+        }
+
     }
+
     const sideBarItems = [
         {
             icon: <Home />,
@@ -64,6 +72,9 @@ const LeftSideBar = () => {
             icon: (
                 <Avatar className="w-6 h-6">
                     <AvatarImage src={user?.profilePicture} />
+                    {
+                        console.log("Profile picture URL:", user?.profilePicture)
+                    }
                     <AvatarFallback>CN</AvatarFallback>
                 </Avatar>
             ),
@@ -78,20 +89,23 @@ const LeftSideBar = () => {
         <div className="fixed top-0 z-10 left-0 px-4 border-r border-color-gray-300 w-[16%] h-screen">
             <div className='flex flex-col'>
                 <h1 className='my-7 pl-3 font-bold text-xl'>LOGO</h1>
-                <div ></div>
-                {sideBarItems.map((item, index) => {
-                    return (
-                        <div
-                            onClick={() => sidebarHandler(item.text)}
-                            key={index}
-                            className='flex items center gap-3 relative hover:bg-gray-100 cursor-pointer rounded-lg p-3'>
-                            {item.icon}
-                            <span>{item.text}</span>
-                        </div>
-                    )
-                })}
+                <div >
+                    {sideBarItems.map((item, index) => {
+                        return (
+                            <div
+                                onClick={() => sidebarHandler(item.text)}
+                                key={index}
+                                className='flex items center gap-3 relative hover:bg-gray-100 cursor-pointer rounded-lg p-3'>
+                                {item.icon}
+                                <span>{item.text}</span>
+                            </div>
+                        )
+                    })}
+                </div>
             </div>
+            <CreatePost open={open} setOpen={setOpen}></CreatePost>
         </div>
+
     )
 }
 
