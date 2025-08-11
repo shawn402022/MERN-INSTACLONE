@@ -7,6 +7,8 @@ import { toast } from 'sonner'
 import axios from 'axios'
 import { Loader2 } from 'lucide-react'
 import { Link, useNavigate } from 'react-router-dom'
+import { useDispatch } from 'react-redux'
+import { setAuthUser } from '@/redux/authSlice'
 
 
 const Login = () => {
@@ -19,6 +21,7 @@ const Login = () => {
 
     const [loading, setLoading] = useState(false)
     const navigate = useNavigate()
+    const dispatch = useDispatch();
 
     //Function to handle input change
     const changeEventHandler = (e) => {
@@ -35,7 +38,7 @@ const Login = () => {
             setLoading(true);
             const res = await axios.post("http://localhost:8000/api/v1/user/login", input,
                 {
-                    // send POST request to the backend 
+                    // send POST request to the backend
                     headers: {
                         "Content-Type": "application/json",
 
@@ -46,6 +49,7 @@ const Login = () => {
 
             //Check to see if login was successful or not
             if (res.data.success) {
+                dispatch(setAuthUser(res.data.user))
                 navigate('/')
                 toast.success(res.data.message)
                 setInput({
