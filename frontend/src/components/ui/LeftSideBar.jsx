@@ -1,9 +1,11 @@
 
 
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
+import { setAuthUser } from "@/redux/authSlice"
 import axios from "axios"
 import { Heart, Home, LogOut, MessageCircle, PlusSquare, Search, TrendingUp } from 'lucide-react'
 import React from 'react'
+import { useDispatch, useSelector } from "react-redux"
 import { useNavigate } from "react-router-dom"
 import { toast } from "sonner"
 
@@ -13,6 +15,8 @@ import { toast } from "sonner"
 const LeftSideBar = () => {
 
     const navigate = useNavigate();
+    const { user } = useSelector((store) => store.auth)
+    const dispatch = useDispatch()
 
     const logoutHandler = async () => {
         try {
@@ -20,15 +24,16 @@ const LeftSideBar = () => {
                 withCredentials: true
             });
             if (res.data.success) {
+                dispatch(setAuthUser(null))
                 navigate('/login')
                 toast.success(res.data.message)
             }
         } catch (error) {
-            toast.error(error.response.data.message)
+            toast.error(error.response?.data?.message)
         }
     };
     const sidebarHandler = (textType) => {
-        if(textType === "Logout") logoutHandler()
+        if (textType === "Logout") logoutHandler()
     }
     const sideBarItems = [
         {
@@ -56,13 +61,9 @@ const LeftSideBar = () => {
             text: "Create"
         },
         {
-            icon: <PlusSquare />,
-            text: "Create"
-        },
-        {
             icon: (
                 <Avatar className="w-6 h-6">
-                    <AvatarImage src="https://github.com/shadcn.png" />
+                    <AvatarImage src={user?.profilePicture} />
                     <AvatarFallback>CN</AvatarFallback>
                 </Avatar>
             ),
@@ -81,8 +82,8 @@ const LeftSideBar = () => {
                 {sideBarItems.map((item, index) => {
                     return (
                         <div
-                        onClick={() => sidebarHandler(item.text)}
-                        key={index}
+                            onClick={() => sidebarHandler(item.text)}
+                            key={index}
                             className='flex items center gap-3 relative hover:bg-gray-100 cursor-pointer rounded-lg p-3'>
                             {item.icon}
                             <span>{item.text}</span>
