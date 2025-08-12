@@ -1,8 +1,8 @@
 import sharp from "sharp"
 import cloudinary from "../utils/cloudinary.js"
-import Post from "../models/post.model.js"
-import User from "../models/user.model.js"
-import Comment from "../models/comments.model.js"
+import {Post} from "../models/post.model.js"
+import {User} from "../models/user.model.js"
+import {Comment} from "../models/comments.model.js"
 
 export const addNewPost = async (req, res) => {
     try {
@@ -29,7 +29,7 @@ export const addNewPost = async (req, res) => {
 
         // Ensure the file is an image
         if (
-            !image.mimitype.startsWith('image/')
+            !image.mimetype.startsWith('image/')
         ) {
             return res.status(400).json({
                 message: "Upload file must be an image"
@@ -49,7 +49,7 @@ export const addNewPost = async (req, res) => {
         }
 
         // Convert bugger to data URI
-        const fileUri = `data:image/jpeg;base64, ${optimizedImageBuffer.toString('base64')}`;
+        const fileUri = `data:image/jpeg;base64,${optimizedImageBuffer.toString('base64')}`;
 
         //Upload to Cloudinary
         let cloudResponse;
@@ -72,7 +72,7 @@ export const addNewPost = async (req, res) => {
         // Update the users post array
         const user = await User.findById(authorId);
         if (user) {
-            user.post.push(post._id);
+            user.posts.push(post._id);
             await user.save();
         }
         //Populate the post author field (exluding password)
@@ -127,7 +127,7 @@ export const getAllPost = async (req, res) => {
 }
 
 // get individual user post logic
-export const getUerPost = async (req, res) => {
+export const getUserPost = async (req, res) => {
     try {
         const authorId = req.id;
         const posts = await Post.find({ author: authorId }).sort({ createAt: -1 })

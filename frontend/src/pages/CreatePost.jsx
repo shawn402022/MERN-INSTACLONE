@@ -3,9 +3,11 @@ import { Button } from '@/components/ui/button'
 import { Dialog, DialogContent, DialogHeader } from '@/components/ui/dialog'
 import { Textarea } from '@/components/ui/textarea'
 import { readFileAsDataURL } from '@/lib/utils'
+import axios from 'axios'
 import { Loader2 } from 'lucide-react'
 import React, { useRef } from 'react'
 import { useState } from 'react'
+import { toast } from 'sonner'
 
 const CreatePost = ({ open, setOpen }) => {
 
@@ -26,15 +28,32 @@ const CreatePost = ({ open, setOpen }) => {
         }
     };
 
-    const createPostHandler = async (e) => {
-        e.preventDefault();
-        console.log(file, caption);
+    const createPostHandler = async () => {
+        const formData = new FormData();
+        formData.append("caption", caption);
+        if (imagePreview) formData.append('image', file)
 
         try {
+            setLoading(true)
+            const res = await axios.post('http://localhost:8000/api/v1/post/addpost',
+                formData,
+                {
+                    headers: {
+                        'Content-Type': 'multipart/form-data'
+                    },
+                    withCredentials: true,
+                });
+            if (res.data.success) {
+                toast.success(res.data.message);
+                setOpen(false);
+            }
 
         } catch (error) {
-
+            toast.error(error.response.data.message);
+        } finally {
+            setLoading(false)
         }
+
     }
 
     return (
@@ -58,7 +77,7 @@ const CreatePost = ({ open, setOpen }) => {
                     </div>
                     <Textarea
                         value={caption}
-                        onChange={(e)=> setCaption(e.target.value)}
+                        onChange={(e) => setCaption(e.target.value)}
                         className="focus-visible:ring-transparent border-none"
                         placeholder="Write Caption"
                     />

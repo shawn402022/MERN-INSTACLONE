@@ -1,4 +1,4 @@
-import {User} from "../models/user.model.js";
+import { User } from "../models/user.model.js";
 import jwt from 'jsonwebtoken';
 import bcrypt from 'bcryptjs';
 import cloudinary from '../utils/cloudinary.js';
@@ -69,18 +69,6 @@ export const login = async (req, res) => {
                 success: false
             })
         }
-        // Exclude the password from the return user object
-        user = {
-            _id: user._id,
-            username: user.username,
-            email: user.email,
-            profilePicture: user.profilePicture,
-            bio: user.bio,
-            followers: user.followers,
-            following: user.following,
-            posts: user.posts,
-
-        }
 
         // Generate a JWT token
         const token = await jwt.sign(
@@ -91,6 +79,31 @@ export const login = async (req, res) => {
                 expiresIn: '1d'
             }
         );
+
+        // Populate each post Id in the post arary
+        const populatedPosts = await Promise.all(
+            user.posts.map(async(postId)=> {
+                const post = await Post.findById(postId)
+                if(post.author.equals(user._id)) {
+                    return post
+                }
+                return null
+            })
+        )
+        // Exclude the password from the return user object
+        user = {
+            _id: user._id,
+            username: user.username,
+            email: user.email,
+            profilePicture: user.profilePicture,
+            bio: user.bio,
+            followers: user.followers,
+            following: user.following,
+            posts: populatedPosts,
+
+        }
+
+
         return res.cookie('token', token, {
             httpOnly: true, sameSite: 'strict', maxAge: 1 * 24 * 60 * 60 * 1000,
         }).json({

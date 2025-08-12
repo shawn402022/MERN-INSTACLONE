@@ -1,14 +1,14 @@
 import { Conversation } from "../models/conversation.model.js";
 //For Chatting
 
-export const sendMessage = async(req,res) => {
-    try{
+export const sendMessage = async (req, res) => {
+    try {
         const senderId = req.id;
         const receiverId = req.params.id;
-        const {message} = req.body;
+        const { message } = req.body;
 
         // validate the message
-        if(!message) {
+        if (!message) {
             return res.status(400).json({
                 success: false,
                 error: "Message content is required"
@@ -17,12 +17,13 @@ export const sendMessage = async(req,res) => {
 
         // Find or create conversation
         let conversation = await Conversation.findOne({
-            participants: {$all:[senderId, receiverId] },
+            participants: { $all: [senderId, receiverId] },
         });
 
-        if(!conversation) {
-            conversation = await Conversation.create({participants: [senderId, receiverId],
-                message:[]
+        if (!conversation) {
+            conversation = await Conversation.create({
+                participants: [senderId, receiverId],
+                message: []
             });
         }
         // Create and save the new message
@@ -40,7 +41,7 @@ export const sendMessage = async(req,res) => {
             success: true,
             newMessage
         })
-    } catch(error){
+    } catch (error) {
         console.error('Error sending message');
         return res.status(500).json({
             success: false,
@@ -51,34 +52,34 @@ export const sendMessage = async(req,res) => {
 
 //get messages
 
-export const getMessage = async(req,res) => {
-    try{
+export const getMessage = async (req, res) => {
+    try {
         const senderId = req.id;
         receiverId = req.params.id;
 
         // find the conversation
 
         const conversation = await Conversation.find(
-            {participats: {$all: [senderId, receiverId]}}
+            { participants: { $all: [senderId, receiverId] } }
         );
 
-        if(!conversation) {
+        if (!conversation) {
             return res.status(200).json({
                 success: true,
-                messages:[],
+                messages: [],
             })
         }
 
         // Return the messages in conversation
         return res.status(200).json({
-            success:true,
+            success: true,
             messages: conversation.messages
         })
-    } catch(error) {
+    } catch (error) {
         console.error('Error retrieving messages;', error);
         return res.status(500).json({
             success: false,
-            error:"An error occurred while retrieving messages"
+            error: "An error occurred while retrieving messages"
         })
     }
 }
