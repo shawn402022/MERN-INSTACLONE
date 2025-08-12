@@ -100,7 +100,7 @@ export const getAllPost = async (req, res) => {
                 createdAt: -1
             })
             .populate({
-                path: 'author,',
+                path: 'author',
                 select: "username profilePicture"
             })
             .populate({
