@@ -13,6 +13,7 @@ import { toast } from "sonner"
 
 
 
+
 const LeftSideBar = () => {
 
     const [open, setOpen] = useState(false)
@@ -103,7 +104,7 @@ const LeftSideBar = () => {
                     })}
                 </div>
             </div>
-            <CreatePost open={open} setOpen={setOpen}></CreatePost>
+            <CreatePost open={open} setOpen={setOpen}/>
         </div>
 
     )
