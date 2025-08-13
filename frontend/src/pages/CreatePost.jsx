@@ -3,10 +3,12 @@ import { Button } from '@/components/ui/button'
 import { Dialog, DialogContent, DialogHeader } from '@/components/ui/dialog'
 import { Textarea } from '@/components/ui/textarea'
 import { readFileAsDataURL } from '@/lib/utils'
+import { setPosts } from '@/redux/postSlice'
 import axios from 'axios'
 import { Loader2 } from 'lucide-react'
 import React, { useRef } from 'react'
 import { useState } from 'react'
+import { useDispatch, useSelector } from 'react-redux'
 import { toast } from 'sonner'
 
 const CreatePost = ({ open, setOpen }) => {
@@ -15,8 +17,10 @@ const CreatePost = ({ open, setOpen }) => {
     const [caption, setCaption] = useState("");
     const [imagePreview, setImagePreview] = useState("");
     const [loading, setLoading] = useState(false);
-
     const imageRef = useRef()
+    const {user} = useSelector((store) => store.auth)
+    const dispatch = useDispatch();
+    const {posts} = useSelector((store) => store.post)
 
 
     const fileChangeHandler = async (e) => {
@@ -44,6 +48,7 @@ const CreatePost = ({ open, setOpen }) => {
                     withCredentials: true,
                 });
             if (res.data.success) {
+                dispatch(setPosts([res.data.post, ...posts,]))
                 toast.success(res.data.message);
                 setOpen(false);
             }
@@ -65,13 +70,13 @@ const CreatePost = ({ open, setOpen }) => {
                     </DialogHeader>
                     <div className="flex gap-3 items-center">
                         <Avatar>
-                            <AvatarImage src="" alt="Avatar" />
+                            <AvatarImage src={user?.profilePicture} alt="Avatar" />
                             <AvatarFallback>
                                 CN
                             </AvatarFallback>
                         </Avatar>
                         <div>
-                            <h1 className="font-semibold text-xs">Username</h1>
+                            <h1 className="font-semibold text-xs">{user?.username}</h1>
                             <span className="text-gray-600 text-xs">Bio here...</span>
                         </div>
                     </div>
