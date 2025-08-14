@@ -1,7 +1,7 @@
 
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
 import { Button } from '@/components/ui/button'
-import { FaRegHeart } from "react-icons/fa";
+import { FaHeart, FaRegHeart } from "react-icons/fa";
 import { MoreHorizontal, Bookmark, MessageCircle, Send } from "lucide-react";
 import {
     Dialog,
@@ -25,7 +25,11 @@ const Post = ({ post }) => {
     const [text, setText] = useState("");
     const [open, setOpen] = useState(false);
     const { user } = useSelector((store) => store.auth)
+    const [liked, setLiked] = useState(post.likes.includes(user?._id) || false);
+    const [postLike, setPostLike] = useState(post.likes.length)
+
     const { posts } = useSelector((store) => store.post)
+
     const dispatch = useDispatch();
     const changeEventHandler = (e) => {
         const inputText = e.target.value;
@@ -36,18 +40,51 @@ const Post = ({ post }) => {
         }
     };
 
+    const likeOrDislikeHandler = async () => {
+        try {
+            //Determine the action: If already liked, user wants dislike otherwise liked
+            const action = liked ? 'dislike' : 'like'
+            // send Get request to like or disliek the post
+            const res = await axios.get(`http://localhost:8000/api/v1/post/${post._id}/${action}`,
+                {
+                    withCredentials: true
+                });
+            if (res.data.success) {
+                // update the local like count
+                const updatedLikes = liked ? postLike - 1 : postLike + 1;
+                setPostLike(updatedLikes);
+                //toggle the liked state
+                setLiked(!liked);
+
+                //Update the post data in teh redux store
+                const updatedPostData = posts.map((p) => p._id === post._id ? {
+                    ...p,
+                    //  if the post was liked, remove the user's Id from the lies array, otherwise, add it
+                    likes: liked ? p.likes.filter(id => id !== user._id) : [...p.likes, user._id]
+                } : p
+                );
+                //Dispatch updated  posts to the redux store
+                dispatch(setPosts(updatedPostData));
+                // show a success toast notification
+                toast.success(res.data.message)
+            }
+        } catch (error) {
+            console.log(error)
+        }
+    }
+
     const deletePostHandler = async () => {
         try {
             const res = await axios.delete(`
-                http://localhost:8000/api/v1/post/delete/${post._id}`,{
-                    withCredentials:true,
-                });
-                if (res.data.success) {
-                    const updatedPostData = posts.filter((postItem) => postItem._id !== post._id);
-                    dispatch(setPosts(updatedPostData))
-                    toast.success(res.data.message);
+                http://localhost:8000/api/v1/post/delete/${post._id}`, {
+                withCredentials: true,
+            });
+            if (res.data.success) {
+                const updatedPostData = posts.filter((postItem) => postItem._id !== post._id);
+                dispatch(setPosts(updatedPostData))
+                toast.success(res.data.message);
 
-                }
+            }
         } catch (error) {
             console.log(error);
             toast.error(error.response.data.message)
@@ -96,13 +133,26 @@ const Post = ({ post }) => {
             />
             <div className="flex items-center justify-between my-2">
                 <div className='flex items-center gap-3'>
-                    <FaRegHeart size={"22px"} className="cursor-pointer hover:text-grey-600" />
+                    {
+                        liked ? (
+                            <FaHeart
+                                onClick={likeOrDislikeHandler}
+                                size={'22px'}
+                                className='cursor-pointer hover: text-red-600'
+                            />
+                        ) : (
+                            <FaRegHeart
+                                onClick={likeOrDislikeHandler}
+                                size={"22px"}
+                                className="cursor-pointer hover:text-grey-600" />
+                        )
+                    }
                     <MessageCircle onClick={() => setOpen(true)} className="cursor-pointer hover:text-grey-600" />
                     <Send className="cursor-pointer hover:text-grey-600" />
                 </div>
                 <Bookmark className="cursor-pointer hover:text-grey-600" />
             </div>
-            <span className="font-medium block mb-2">{post.likes.length}</span>
+            <span className="font-medium block mb-2">{postLike}</span>
             <p>
                 <span className="font-medium mr-2">{post?.author.username}</span>
                 {post.caption}
