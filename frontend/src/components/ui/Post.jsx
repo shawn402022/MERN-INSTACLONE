@@ -3,9 +3,6 @@ import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
 import { Button } from '@/components/ui/button'
 import { FaRegHeart } from "react-icons/fa";
 import { MoreHorizontal, Bookmark, MessageCircle, Send } from "lucide-react";
-
-
-
 import {
     Dialog,
     DialogContent,
@@ -14,22 +11,46 @@ import {
     DialogTitle,
     DialogTrigger,
 } from "@/components/ui/dialog"
-
-
 import React, { useState } from 'react'
 import CommentDialog from "./CommentDialog";
+import { useDispatch, useSelector } from "react-redux";
+import { toast } from "sonner";
+import { setPosts } from "@/redux/postSlice";
+import axios from "axios";
+
 
 
 const Post = ({ post }) => {
 
     const [text, setText] = useState("");
-    const [open, setOpen] = useState(false)
+    const [open, setOpen] = useState(false);
+    const { user } = useSelector((store) => store.auth)
+    const { posts } = useSelector((store) => store.post)
+    const dispatch = useDispatch();
     const changeEventHandler = (e) => {
         const inputText = e.target.value;
         if (inputText.trim()) {
             setText(inputText);
         } else {
             setText("")
+        }
+    };
+
+    const deletePostHandler = async () => {
+        try {
+            const res = await axios.delete(`
+                http://localhost:8000/api/v1/post/delete/${post._id}`,{
+                    withCredentials:true,
+                });
+                if (res.data.success) {
+                    const updatedPostData = posts.filter((postItem) => postItem._id !== post._id);
+                    dispatch(setPosts(updatedPostData))
+                    toast.success(res.data.message);
+
+                }
+        } catch (error) {
+            console.log(error);
+            toast.error(error.response.data.message)
         }
     }
 
@@ -55,9 +76,17 @@ const Post = ({ post }) => {
                         <Button variant='ghost' className='cursor-pointer w-fit'>
                             Add to favorites
                         </Button>
-                        <Button variant='ghost' className='cursor-pointer w-fit'>
-                            Delete
-                        </Button>
+                        {
+                            user && user?._id === post?.author._id &&
+                            (
+                                <Button onClick={deletePostHandler} variant='ghost' className='cursor-pointer w-fit'>
+                                    Delete
+                                </Button>
+                            )
+
+                        }
+
+
                     </DialogContent>
                 </Dialog>
             </div>

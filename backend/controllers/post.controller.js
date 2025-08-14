@@ -318,7 +318,7 @@ export const getCommentsOfPost = async (req, res) => {
 }
 
 //Delete Post Logic
-export const deletePost = async (reg, res) => {
+export const deletePost = async (req, res) => {
     try {
         const postId = req.params.id;
         const authorId = req.id;
@@ -339,7 +339,7 @@ export const deletePost = async (reg, res) => {
             })
         }
         //Delete post
-        await post.findByIdAndDelete(postId);
+        await Post.findByIdAndDelete(postId);
 
         //Remove the postId from the users post list
         let user = await User.findById(authorId);
