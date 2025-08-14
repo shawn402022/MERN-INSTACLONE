@@ -1,16 +1,10 @@
 
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
 import { Button } from '@/components/ui/button'
+import { Badge } from "@/components/ui/badge"
 import { FaHeart, FaRegHeart } from "react-icons/fa";
 import { MoreHorizontal, Bookmark, MessageCircle, Send } from "lucide-react";
-import {
-    Dialog,
-    DialogContent,
-    DialogDescription,
-    DialogHeader,
-    DialogTitle,
-    DialogTrigger,
-} from "@/components/ui/dialog"
+import { Dialog, DialogContent, DialogTrigger,} from "@/components/ui/dialog"
 import React, { useState } from 'react'
 import CommentDialog from "./CommentDialog";
 import { useDispatch, useSelector } from "react-redux";
@@ -36,7 +30,7 @@ const Post = ({ post }) => {
     //Synchronize 'comment' state with the redux store
     useEffect(() => {
         const updatedPost = posts.find((p) => p._id === post._id);
-        if(updatedPost) {
+        if (updatedPost) {
             setComment(updatedPost.comments) //Update the comment state
         }
     }, [posts, post._id])
@@ -146,6 +140,10 @@ const Post = ({ post }) => {
                         <AvatarFallback>CN</AvatarFallback>
                     </Avatar>
                     <h1>{post.author?.username}</h1>
+                    {
+                        user?._id === post.author._id && <Badge variant='secondary'>Author</Badge>
+                    }
+
 
                 </div>
                 <Dialog>
