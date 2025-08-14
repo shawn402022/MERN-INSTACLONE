@@ -3,6 +3,7 @@
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
 import CreatePost from "@/pages/CreatePost"
 import { setAuthUser } from "@/redux/authSlice"
+import { setPosts, setSelectedPost } from "@/redux/postSlice"
 import axios from "axios"
 import { Heart, Home, LogOut, MessageCircle, PlusSquare, Search, TrendingUp } from 'lucide-react'
 import React, { useState } from 'react'
@@ -27,7 +28,9 @@ const LeftSideBar = () => {
                 withCredentials: true
             });
             if (res.data.success) {
-                dispatch(setAuthUser(null))
+                dispatch(setAuthUser(null));
+                dispatch(setSelectedPost(null));
+                dispatch(setPosts([]))
                 navigate('/login')
                 toast.success(res.data.message)
             }

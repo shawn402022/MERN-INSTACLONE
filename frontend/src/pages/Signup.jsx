@@ -5,7 +5,7 @@ import { Button } from '@/components/ui/button'
 import { useState } from 'react'
 import { toast } from 'sonner'
 import axios from 'axios'
-import { Link, Navigate } from 'react-router-dom'
+import { Link, useNavigate } from 'react-router-dom'
 import { Loader2 } from 'lucide-react'
 
 
@@ -19,7 +19,7 @@ const Signup = () => {
     });
 
     const [loading, setLoading] = useState(false);
-    const navigate = Navigate()
+    const navigate = useNavigate()
 
     //Function to handle input change
     const changeEventHandler = (e) => {
@@ -36,7 +36,7 @@ const Signup = () => {
             setLoading(true);
             const res = await axios.post("http://localhost:8000/api/v1/user/register", input,
                 {
-                    //Send POST request to the backend 
+                    //Send POST request to the backend
                     headers: {
                         "Content-Type": "application/json",
 

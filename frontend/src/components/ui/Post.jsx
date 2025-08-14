@@ -15,8 +15,9 @@ import React, { useState } from 'react'
 import CommentDialog from "./CommentDialog";
 import { useDispatch, useSelector } from "react-redux";
 import { toast } from "sonner";
-import { setPosts } from "@/redux/postSlice";
+import { setPosts, setSelectedPost } from "@/redux/postSlice";
 import axios from "axios";
+import { useEffect } from "react";
 
 
 
@@ -31,6 +32,15 @@ const Post = ({ post }) => {
     const { posts } = useSelector((store) => store.post)
     const [comment, setComment] = useState(post.comments)
     const dispatch = useDispatch();
+
+    //Synchronize 'comment' state with the redux store
+    useEffect(() => {
+        const updatedPost = posts.find((p) => p._id === post._id);
+        if(updatedPost) {
+            setComment(updatedPost.comments) //Update the comment state
+        }
+    }, [posts, post._id])
+
     const changeEventHandler = (e) => {
         const inputText = e.target.value;
         if (inputText.trim()) {
@@ -83,7 +93,7 @@ const Post = ({ post }) => {
                 withCredentials: true // Include credentials (cookies ) with request
             });
 
-            console.log(res.data)
+
             //Check if the API response is successful
             if (res.data.success) {
                 //Update the comment state with the new comment added
@@ -183,8 +193,16 @@ const Post = ({ post }) => {
                                 className="cursor-pointer hover:text-grey-600" />
                         )
                     }
-                    <MessageCircle onClick={() => setOpen(true)} className="cursor-pointer hover:text-grey-600" />
-                    <Send className="cursor-pointer hover:text-grey-600" />
+                    <MessageCircle
+                        onClick={() => {
+                            dispatch(setSelectedPost(post))
+                            setOpen(true)
+                        }}
+                        className="cursor-pointer hover:text-grey-600"
+                    />
+                    <Send
+                        className="cursor-pointer hover:text-grey-600"
+                    />
                 </div>
                 <Bookmark className="cursor-pointer hover:text-grey-600" />
             </div>
@@ -193,12 +211,20 @@ const Post = ({ post }) => {
                 <span className="font-medium mr-2">{post?.author.username}</span>
                 {post.caption}
             </p>
-            <span
-                onClick={() => setOpen(true)}
-                className="cursor-pointer text-sm text-gray-400"
-            >
-                View all {comment.length} comments
-            </span>
+            {
+                comment.length > 0 && (
+                    <span
+                        onClick={() => {
+                            dispatch(setSelectedPost(post))
+                            setOpen(true)
+                        }}
+                        className="cursor-pointer text-sm text-gray-400"
+                    >
+                        View all {comment.length} comments
+                    </span>
+                )
+            }
+
             <CommentDialog open={open} setOpen={setOpen} />
             <div className="flex items-center justify-between">
                 <input
