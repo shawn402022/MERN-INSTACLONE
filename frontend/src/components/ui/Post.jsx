@@ -29,7 +29,7 @@ const Post = ({ post }) => {
     const [postLike, setPostLike] = useState(post.likes.length)
 
     const { posts } = useSelector((store) => store.post)
-
+    const [comment, setComment] = useState(post.comments)
     const dispatch = useDispatch();
     const changeEventHandler = (e) => {
         const inputText = e.target.value;
@@ -68,6 +68,42 @@ const Post = ({ post }) => {
                 // show a success toast notification
                 toast.success(res.data.message)
             }
+        } catch (error) {
+            console.log(error)
+        }
+    };
+
+    const commentHandler = async () => {
+        try {
+            //Make an http post request to add a comment
+            const res = await axios.post(`http://localhost:8000/api/v1/post/${post._id}/comment`, { text }, {
+                headers: {
+                    'Content-Type': 'application/json' // Specify content type as JSON
+                },
+                withCredentials: true // Include credentials (cookies ) with request
+            });
+
+            console.log(res.data)
+            //Check if the API response is successful
+            if (res.data.success) {
+                //Update the comment state with the new comment added
+                const updatedCommentData = [...comment, res.data.comment]
+                setComment(updatedCommentData)
+
+                // Update the posts state by finding the matching the post and updating its comments
+                const updatedPostData = posts.map((p) => p._id === post._id ? { ...p, comments: updatedCommentData } : p
+                );
+
+                //Dispatch the updated posts to the Redux store
+                dispatch(setPosts(updatedPostData));
+
+                //Display a success message to the user using a toast notification
+                toast.success(res.data.message);
+
+                //Reset the comment input field after successful submission
+                setText("");
+            }
+
         } catch (error) {
             console.log(error)
         }
@@ -157,7 +193,12 @@ const Post = ({ post }) => {
                 <span className="font-medium mr-2">{post?.author.username}</span>
                 {post.caption}
             </p>
-            <span onClick={() => setOpen(true)} className="cursor-pointer text-sm text-gray-400">View all 10 comments</span>
+            <span
+                onClick={() => setOpen(true)}
+                className="cursor-pointer text-sm text-gray-400"
+            >
+                View all {comment.length} comments
+            </span>
             <CommentDialog open={open} setOpen={setOpen} />
             <div className="flex items-center justify-between">
                 <input
@@ -167,7 +208,12 @@ const Post = ({ post }) => {
                     placeholder="Add a comment..."
                     className="outline-none text-sm w-full"
                 />
-                {text && <span className="text-[#3BADF8] cursor-pointer">Post</span>}
+                {text &&
+                    <span
+                        onClick={commentHandler}
+                        className="text-[#3BADF8] cursor-pointer"
+                    >Post
+                    </span>}
             </div>
         </div>
 

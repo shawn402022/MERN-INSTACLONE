@@ -261,7 +261,7 @@ export const addComment = async (req, res) => {
         });
 
         //Add the comment to the post's comment array
-        Post.comments.push(comment._id);
+        post.comments.push(comment._id);
         await post.save();
         return res.status(200).json({
             message: "Comment Added",
