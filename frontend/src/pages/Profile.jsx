@@ -11,6 +11,8 @@ const Profile = () => {
     const params = useParams();
     const userId = params.id
     useGetUserProfile(userId);
+    const isLoggedInUserProfile = true;
+    const isFollowing = true
 
     const { userProfile } = useSelector((store) => store.auth);
 
@@ -29,12 +31,34 @@ const Profile = () => {
                         <div className="flex flex-col gap-5">
                             <div className="flex items-center gap-2">
                                 <span>{userProfile?.username}</span>
-                                <>
-                                    <Button variant="secondary" className="hover:bg-gray-200 h-8">Edit Profile
-                                    </Button>
-                                    <Button variant="secondary" className="hover:bg-gray-200 h-8">View Archive
-                                    </Button>
-                                </>
+                                {isLoggedInUserProfile ? (
+                                    <>
+                                        <Button
+                                            variant="secondary"
+                                            className="hover:bg-gray-200 h-8"
+                                        >
+                                            Edit Profile
+                                        </Button>
+                                        <Button
+                                            variant="secondary"
+                                            className="hover:bg-gray-200 h-8"
+                                        >
+                                            View Archive
+                                        </Button>
+                                    </>
+                                ) :  isFollowing ? (
+                                        <>
+
+                                            <Button variant="secondary" className="h-8">
+                                                UnFollow
+                                            </Button>
+                                            <Button variant="secondary" className="h-8">Message</Button>
+                                        </>
+                                    ) : (
+                                        <Button className="bg-[#0095f6] hover: bg-[#3192d2] h-8 ">
+                                            Follow
+                                        </Button>
+                                    )}
                             </div>
                         </div>
                     </section>
