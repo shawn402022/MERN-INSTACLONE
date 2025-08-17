@@ -1,9 +1,14 @@
 import React from 'react'
+import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
+
 
 const Profile = () => {
     return (
         <div>
-            Profile
+            <Avatar >
+                <AvatarImage src={post.author?.profilePicture} alt='User' />
+                <AvatarFallback>CN</AvatarFallback>
+            </Avatar>
         </div>
     )
 }
